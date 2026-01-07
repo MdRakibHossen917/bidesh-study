@@ -125,15 +125,16 @@ const HeroBanner = () => {
         
         {/* Orbit Animation - Dream71 Style with Country Flags */}
         <div 
-          className="absolute top-1/2 left-1/2 hidden md:block z-50 orbit"
+          className="absolute top-1/2 left-1/2 hidden md:block z-40 orbit"
           style={{
-            transform: 'translate(-50%, calc(-50% - 90px))',
+            transform: 'translate(-50%, calc(-50% - 50px))',
             transformOrigin: 'center center',
             animation: 'rotateCircle 40s linear infinite',
             maxWidth: '100vw',
             overflow: 'visible',
             width: '650px',
             height: '650px',
+            pointerEvents: 'none',
           }}
         >
           {orbitCountries.map((country, index) => {
@@ -143,7 +144,7 @@ const HeroBanner = () => {
             return (
               <div
                 key={index}
-                className={`absolute planet flex items-center justify-center w-16 h-16 bg-gradient-to-br from-card/95 to-card/85 backdrop-blur-md rounded-full border-2 border-primary/30 shadow-2xl z-30 hover:scale-130 hover:border-primary hover:shadow-2xl hover:bg-card transition-all duration-500 cursor-pointer ${
+                className={`absolute planet flex items-center justify-center w-16 h-16 z-45 hover:scale-130 transition-all duration-500 cursor-pointer ${
                   expandedFlag === index ? 'flag-expanded' : ''
                 }`}
                 style={{
@@ -156,6 +157,7 @@ const HeroBanner = () => {
                   '--base-radius': `${baseRadius}px`,
                   '--x': `${Math.cos(angleInRadians) * baseRadius}px`,
                   '--y': `${Math.sin(angleInRadians) * baseRadius}px`,
+                  pointerEvents: 'auto',
                 } as React.CSSProperties & { 
                   '--entrance-delay': string;
                   '--angle': string; 
@@ -185,8 +187,8 @@ const HeroBanner = () => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="container relative z-10 px-4 py-12">
+          {/* Main Content */}
+          <div className="container relative z-30 px-4 py-12">
         <div className="max-w-4xl mx-auto text-center">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full mb-6 animate-fade-in">
@@ -209,7 +211,7 @@ const HeroBanner = () => {
           </p>
 
           {/* Search Bar */}
-          <div className="max-w-2xl mx-auto mb-10 animate-fade-in-up animation-delay-400">
+          <div className="max-w-2xl mx-auto mb-10 animate-fade-in-up animation-delay-400 relative z-30">
             <div className="relative flex items-center bg-card border border-border rounded-2xl p-2 shadow-search focus-within:shadow-search-focus transition-shadow duration-300">
               <div className="flex items-center gap-2 px-4">
                 <Search className="w-5 h-5 text-muted-foreground" />
@@ -217,11 +219,12 @@ const HeroBanner = () => {
               <input
                 type="text"
                 placeholder="Search universities, programs, or countries..."
-                className="flex-1 py-3 bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none"
+                className="flex-1 py-3 bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none relative z-10"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
               />
-              <Button size="lg" className="rounded-xl shadow-button">
+              <Button size="lg" className="rounded-xl shadow-button relative z-10">
                 <span className="hidden sm:inline">Explore Now</span>
                 <ArrowRight className="w-5 h-5 sm:ml-2" />
               </Button>
