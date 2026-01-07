@@ -68,6 +68,30 @@ type StatItem = {
 
 const HeroBanner = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [expandedFlag, setExpandedFlag] = useState<number | null>(null);
+  const expandTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-collapse after 3 seconds
+  useEffect(() => {
+    if (expandedFlag !== null) {
+      // Clear any existing timeout
+      if (expandTimeoutRef.current) {
+        clearTimeout(expandTimeoutRef.current);
+      }
+      
+      // Set new timeout to collapse
+      expandTimeoutRef.current = setTimeout(() => {
+        setExpandedFlag(null);
+      }, 3000);
+    }
+
+    // Cleanup on unmount or when expandedFlag changes
+    return () => {
+      if (expandTimeoutRef.current) {
+        clearTimeout(expandTimeoutRef.current);
+      }
+    };
+  }, [expandedFlag]);
 
   const stats: StatItem[] = [
     { icon: Globe, target: 150, suffix: "+", label: "Countries", duration: 2000 },
@@ -77,13 +101,15 @@ const HeroBanner = () => {
 
   const orbitCountries = [
     { name: "US", countryCode: "US", angle: 0 },
-    { name: "GB", countryCode: "GB", angle: 45 },
-    { name: "CA", countryCode: "CA", angle: 90 },
-    { name: "AU", countryCode: "AU", angle: 135 },
-    { name: "Germany", countryCode: "DE", angle: 180 },
-    { name: "Spain", countryCode: "ES", angle: 225 },
-    { name: "Japan", countryCode: "JP", angle: 270 },
-    { name: "South Korea", countryCode: "KR", angle: 315 },
+    { name: "GB", countryCode: "GB", angle: 36 },
+    { name: "CA", countryCode: "CA", angle: 72 },
+    { name: "AU", countryCode: "AU", angle: 108 },
+    { name: "Germany", countryCode: "DE", angle: 144 },
+    { name: "France", countryCode: "FR", angle: 180 },
+    { name: "Spain", countryCode: "ES", angle: 216 },
+    { name: "Japan", countryCode: "JP", angle: 252 },
+    { name: "South Korea", countryCode: "KR", angle: 288 },
+    { name: "Netherlands", countryCode: "NL", angle: 324 },
   ];
 
   return (
@@ -99,33 +125,45 @@ const HeroBanner = () => {
         
         {/* Orbit Animation - Dream71 Style with Country Flags */}
         <div 
-          className="absolute top-1/2 left-1/2 hidden md:block z-50 pointer-events-none orbit"
+          className="absolute top-1/2 left-1/2 hidden md:block z-50 orbit"
           style={{
-            transform: 'translate(-50%, calc(-50% - 120px))',
+            transform: 'translate(-50%, calc(-50% - 90px))',
             transformOrigin: 'center center',
             animation: 'rotateCircle 40s linear infinite',
             maxWidth: '100vw',
-            overflow: 'hidden',
+            overflow: 'visible',
+            width: '650px',
+            height: '650px',
           }}
         >
           {orbitCountries.map((country, index) => {
-            const baseRadius = 280;
+            const baseRadius = 250;
+            const angleInRadians = (country.angle * Math.PI) / 180;
             
             return (
               <div
                 key={index}
-                className="absolute planet flex items-center justify-center w-16 h-16 bg-card/90 backdrop-blur-sm rounded-full border-2 border-primary/30 shadow-lg z-30 hover:scale-110 hover:border-primary/60"
+                className={`absolute planet flex items-center justify-center w-16 h-16 bg-gradient-to-br from-card/95 to-card/85 backdrop-blur-md rounded-full border-2 border-primary/30 shadow-2xl z-30 hover:scale-130 hover:border-primary hover:shadow-2xl hover:bg-card transition-all duration-500 cursor-pointer ${
+                  expandedFlag === index ? 'flag-expanded' : ''
+                }`}
                 style={{
                   left: '50%',
                   top: '50%',
                   transformOrigin: 'center center',
-                  opacity: 1,
-                  willChange: 'transform',
-                  animation: `orbitPulse 4s ease-in-out infinite`,
-                  animationDelay: `${index * 0.5}s`,
+                  willChange: 'transform, opacity, filter, box-shadow',
+                  '--entrance-delay': `${index * 0.25}s`,
                   '--angle': `${country.angle}deg`,
                   '--base-radius': `${baseRadius}px`,
-                } as React.CSSProperties & { '--angle': string; '--base-radius': string }}
+                  '--x': `${Math.cos(angleInRadians) * baseRadius}px`,
+                  '--y': `${Math.sin(angleInRadians) * baseRadius}px`,
+                } as React.CSSProperties & { 
+                  '--entrance-delay': string;
+                  '--angle': string; 
+                  '--base-radius': string;
+                  '--x': string;
+                  '--y': string;
+                }}
+                onClick={() => setExpandedFlag(expandedFlag === index ? null : index)}
                 title={country.name}
               >
                 <ReactCountryFlag
@@ -135,7 +173,10 @@ const HeroBanner = () => {
                     width: "2em",
                     height: "2em",
                     display: 'block',
+                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+                    transition: 'transform 0.3s ease, filter 0.3s ease',
                   }}
+                  className="flag-icon"
                   title={country.name}
                 />
               </div>

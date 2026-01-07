@@ -174,8 +174,16 @@ const InstitutionDetails = () => {
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Button size="lg" className="shadow-button">
-                Apply Now
+              <Button size="lg" className="shadow-button" asChild>
+                <Link 
+                  to="/apply-now" 
+                  state={{ 
+                    institutionName: institution.name,
+                    country: institution.country 
+                  }}
+                >
+                  Apply Now
+                </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
                 <a href={institution.website} target="_blank" rel="noopener noreferrer">
