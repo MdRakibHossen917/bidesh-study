@@ -1,15 +1,78 @@
 import { Button } from "@/components/ui/button";
 import { Search, Globe, Users, Award, ArrowRight, MapPin } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import ReactCountryFlag from "react-country-flag";
+
+// Counter hook for animated numbers
+const useCounter = (target: number, duration: number = 2000, suffix: string = "") => {
+  const [count, setCount] = useState(0);
+  const [hasStarted, setHasStarted] = useState(false);
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasStarted) {
+            setHasStarted(true);
+            const startTime = Date.now();
+            const startValue = 0;
+
+            const animate = () => {
+              const now = Date.now();
+              const elapsed = now - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              
+              // Easing function for smooth animation
+              const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+              const currentValue = Math.floor(startValue + (target - startValue) * easeOutQuart);
+              
+              setCount(currentValue);
+
+              if (progress < 1) {
+                requestAnimationFrame(animate);
+              } else {
+                setCount(target);
+              }
+            };
+
+            requestAnimationFrame(animate);
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    if (elementRef.current) {
+      observer.observe(elementRef.current);
+    }
+
+    return () => {
+      if (elementRef.current) {
+        observer.unobserve(elementRef.current);
+      }
+    };
+  }, [target, duration, hasStarted]);
+
+  return { count, elementRef, suffix };
+};
+
+type StatItem = {
+  icon: React.ComponentType<{ className?: string }>;
+  target: number;
+  suffix: string;
+  label: string;
+  duration: number;
+  format?: string;
+};
 
 const HeroBanner = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const stats = [
-    { icon: Globe, value: "150+", label: "Countries" },
-    { icon: Users, value: "50K+", label: "Students Placed" },
-    { icon: Award, value: "2000+", label: "Universities" },
+  const stats: StatItem[] = [
+    { icon: Globe, target: 150, suffix: "+", label: "Countries", duration: 2000 },
+    { icon: Users, target: 50000, suffix: "+", label: "Students Placed", duration: 2500, format: "K" },
+    { icon: Award, target: 2000, suffix: "+", label: "Universities", duration: 2000 },
   ];
 
   const orbitCountries = [
@@ -24,7 +87,7 @@ const HeroBanner = () => {
   ];
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-hero pt-20">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-hero pt-20 w-full max-w-full">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Grid Pattern */}
@@ -41,6 +104,8 @@ const HeroBanner = () => {
             transform: 'translate(-50%, calc(-50% - 120px))',
             transformOrigin: 'center center',
             animation: 'rotateCircle 40s linear infinite',
+            maxWidth: '100vw',
+            overflow: 'hidden',
           }}
         >
           {orbitCountries.map((country, index) => {
@@ -138,17 +203,33 @@ const HeroBanner = () => {
 
           {/* Stats */}
           <div className="flex flex-wrap justify-center gap-8 md:gap-16 animate-fade-in-up animation-delay-800">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-primary/10 rounded-xl">
-                  <stat.icon className="w-6 h-6 text-primary" />
+            {stats.map((stat, index) => {
+              const StatCounter = () => {
+                const { count, elementRef } = useCounter(stat.target, stat.duration, stat.suffix);
+                const formatValue = () => {
+                  if (stat.format === "K" && stat.target >= 1000) {
+                    return `${(count / 1000).toFixed(0)}K${stat.suffix}`;
+                  }
+                  return `${count.toLocaleString()}${stat.suffix}`;
+                };
+
+                return (
+                  <div ref={elementRef} className="text-2xl md:text-3xl font-bold text-foreground">
+                    {formatValue()}
+                  </div>
+                );
+              };
+
+              return (
+                <div key={index} className="text-center">
+                  <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-primary/10 rounded-xl">
+                    <stat.icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <StatCounter />
+                  <div className="text-sm text-muted-foreground">{stat.label}</div>
                 </div>
-                <div className="text-2xl md:text-3xl font-bold text-foreground">
-                  {stat.value}
-                </div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
