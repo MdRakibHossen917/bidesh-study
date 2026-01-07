@@ -12,7 +12,7 @@ const HeroBanner = () => {
     { icon: Award, value: "2000+", label: "Universities" },
   ];
 
-  const floatingCountries = [
+  const orbitCountries = [
     { name: "US", countryCode: "US", angle: 0 },
     { name: "GB", countryCode: "GB", angle: 45 },
     { name: "CA", countryCode: "CA", angle: 90 },
@@ -34,33 +34,34 @@ const HeroBanner = () => {
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-float" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/20 rounded-full blur-3xl animate-float-delayed" />
         
-        {/* Floating Country Tags - Rotating from Banner Center */}
+        {/* Orbit Animation - Dream71 Style with Country Flags */}
         <div 
-          className="absolute top-1/2 left-1/2 w-[545px] h-[545px] hidden md:block z-20 pointer-events-none"
+          className="absolute top-1/2 left-1/2 hidden md:block z-50 pointer-events-none orbit"
           style={{
-            marginLeft: '-272.5px',
-            marginTop: '-312px',
-            transformOrigin: '272.5px 272.5px',
-            animation: 'rotateCircle 30s linear infinite',
+            transform: 'translate(-50%, calc(-50% - 120px))',
+            transformOrigin: 'center center',
+            animation: 'rotateCircle 40s linear infinite',
           }}
         >
-          {floatingCountries.map((country, index) => {
-            const radius = 245; // Distance from center in pixels (35px smaller)
-            const initialAngle = country.angle;
-            const centerX = 272.5; // Center of 545px container
-            const centerY = 272.5; // Center of 545px container
+          {orbitCountries.map((country, index) => {
+            const baseRadius = 280;
             
             return (
               <div
                 key={index}
-                className="absolute flex items-center justify-center p-2 bg-card/80 backdrop-blur-sm rounded-full border border-border/50 shadow-float z-30"
+                className="absolute planet flex items-center justify-center w-16 h-16 bg-card/90 backdrop-blur-sm rounded-full border-2 border-primary/30 shadow-lg z-30 hover:scale-110 hover:border-primary/60"
                 style={{
-                  left: `${centerX}px`,
-                  top: `${centerY}px`,
+                  left: '50%',
+                  top: '50%',
                   transformOrigin: 'center center',
-                  transform: `translate(-50%, -50%) rotate(${initialAngle}deg) translateX(${radius}px) rotate(-${initialAngle}deg)`,
+                  opacity: 1,
                   willChange: 'transform',
-                }}
+                  animation: `orbitPulse 4s ease-in-out infinite`,
+                  animationDelay: `${index * 0.5}s`,
+                  '--angle': `${country.angle}deg`,
+                  '--base-radius': `${baseRadius}px`,
+                } as React.CSSProperties & { '--angle': string; '--base-radius': string }}
+                title={country.name}
               >
                 <ReactCountryFlag
                   countryCode={country.countryCode}
